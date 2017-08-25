@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"strings"
 	"sync/atomic"
-	"syscall"
 	"time"
 )
 
@@ -99,8 +98,10 @@ func New() (*DB, error) {
 }
 
 func (db *DB) Close() error {
-	db.cmd.Process.Signal(syscall.SIGINT)
-	return db.cmd.Wait()
+	err := db.cmd.Process.Kill()
+	fmt.Println("Killing dynamodb pid=", db.cmd.Process.Pid, " err=", err)
+	_, err = db.cmd.Process.Wait()
+	return err
 }
 
 func (db *DB) URL() string {
